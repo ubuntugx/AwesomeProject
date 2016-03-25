@@ -34,16 +34,6 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
   }
-  // container: {
-  //   flex: 1,
-  //   justifyContent: 'center',
-  //   alignItems: 'center',
-  // },
-  // description: {
-  //   fontSize: 20,
-  //   backgroundColor: '#FFF',
-  // },
 })
 
 module.exports = Search;
-// AppRegistry.registerComponent('AwesomeProject', () => AwesomeProject);

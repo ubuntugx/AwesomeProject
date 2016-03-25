@@ -9,7 +9,8 @@ import React,{
 
 class BookDetail extends Component{
   render(){
-    const book = this.props.book;
+    const book = this.props.book;   // 由前面传递的属性
+    // 判断 ImageURI 是否存在
     const imageURI = (typeof book.volumeInfo.imageLinks !== 'undefined') ? book.volumeInfo.imageLinks.thumbnail : '';
     const description = (typeof book.volumeInfo.description !== 'undefined') ? book.volumeInfo.description : '';
     return(
