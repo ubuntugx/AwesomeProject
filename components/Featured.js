@@ -4,26 +4,19 @@ import React,{
   StyleSheet,
   Text,
   View,
-  NavigatorIOS,
-  // Navigator,
+  Navigator,
 } from 'react-native';
 
-import BookList from './BookList';
+// import BookList from './BookList';
+import NavButton from './NavButton';
+import Routes from './Routes';
 
 class Featured extends Component{
   render(){
     return (
-      // 子页面中分别需要切换页面，需要用到路由 
-      // 这一段改为 Navigator
-      <NavigatorIOS
-        style={styles.container}
-        // 初始化第一个路由
-        initialRoute={{
-          // 添加标题和关联的组件，这块可以直接写 html  
-          title: 'Featured Books',
-          component: BookList,     // 初始路径定为 BookList 组件
-         }} 
-      />
+      <View style={styles.container}>
+        {Routes.navigator('feature')}
+      </View>
       //<Navigator
         // sceneStyle={styles.container}
         // // 指定初始路由
@@ -40,8 +33,16 @@ class Featured extends Component{
         // renderScene={(route, navigator)=>{
         //   let Component = route.component;
         //   // 参数为向下传递的参数，和向下传递的 navigatior
-        //   return <Component {...route.params} navigator={navigator} />
+        //   return (
+        //       <Component {...route.params} navigator={navigator}/>
+        //     )
         // }}
+        // navigatorBar = {
+        //   <Navigator.NavigationBar
+        //     routeMapper={NavigationBarRouteMapper}
+        //     style={styles.navBar}
+        //   />
+        // }
       ///>
     )
   }
@@ -50,7 +51,10 @@ class Featured extends Component{
 const styles = StyleSheet.create({
   container:{
     flex: 1,
-  }
+  },
+  navBar: {
+    backgroundColor: '#FFF',
+  },
 })
 
 module.exports = Featured;   // 将模块导出

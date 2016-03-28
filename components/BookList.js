@@ -6,6 +6,7 @@ import React,{
   View,
   Image,
   ListView,
+  ScrollView,
   TouchableHighlight,
   ActivityIndicatorIOS,   // loading
 } from 'react-native';
@@ -36,7 +37,7 @@ class BookList extends Component{
     this.fetchData();
   }
 
-  fetchData= ()=>{
+  fetchData = ()=>{
     // 用 fetch 来获取数据
     // 参数为指定的 url
     fetch(REQUEST_URL)
@@ -84,19 +85,22 @@ class BookList extends Component{
     // push(route) 给导航器添加一个新路由
     // 这个 navigator 的属性是由前面一页传过来的
     // 调用 push 方法加入新的路由
-    this.props.navigator.push({
-      // 还包括这几项，其中 passProps 用于传递属性
-      title: book.volumeInfo.title,
-      component: BookDetail,   // 组件内容
-      // 传递一个属性对象 键：值
-      passProps: {book},       // 传递的属性 ES6 写法，相当于 book: book
-    });
-  
     // this.props.navigator.push({
-    //   name: 'Book Detail',
-    //   component: BookDetail,
-    //   params: {book},
-    // })
+    //   // 还包括这几项，其中 passProps 用于传递属性
+    //   title: book.volumeInfo.title,
+    //   component: BookDetail,   // 组件内容
+    //   // 传递一个属性对象 键：值
+    //   passProps: {book},       // 传递的属性 ES6 写法，相当于 book: book
+    // });
+    const {navigator} = this.props;
+    if(navigator){
+      console.log('enter navigator');
+      navigator.push({
+        name: 'Book Detail',
+        component: BookDetail,
+        params: {book},
+      })
+    }
   };
 
   render(){
@@ -105,12 +109,14 @@ class BookList extends Component{
       return this.renderLoadingView()
     }
     return(
-      // 数据传进来之后显示，
-      <ListView
-        style={styles.listView}
-        dataSource={this.state.dataSource}
-        // 定义 listView 每一行的样式
-        renderRow={this.renderBook} />
+      // 数据传进来之后显示
+      <ScrollView style={styles.scene}>
+        <ListView
+          style={styles.listView}
+          dataSource={this.state.dataSource}
+          // 定义 listView 每一行的样式
+          renderRow={this.renderBook} />
+      </ScrollView>
     );
   }
 
@@ -135,7 +141,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     backgroundColor: '#F5FCFF',
-    padding: 10
+    padding: 10,
   },
   thumbnail: {
     width: 53,
@@ -157,14 +163,20 @@ const styles = StyleSheet.create({
     backgroundColor: '#ddd',
   },
   listView: {
-    marginTop: 65,   // 自己加的防止 ListView 被上面的导航条挡住
+    // marginTop: 65,   // 自己加的防止 ListView 被上面的导航条挡住
     backgroundColor:'#F5FCFF',
   },
   loading: {
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-  }
+  },
+  scene:{
+    flex: 1,
+    paddingTop: 20,
+    backgroundColor: '#EAEAEA',
+  },
+
 })
 
 module.exports = BookList;
