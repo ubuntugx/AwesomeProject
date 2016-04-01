@@ -6,7 +6,7 @@ import React,{
   View,
   Image,
   ListView,
-  ScrollView,
+  // ScrollView,
   TouchableHighlight,
   ActivityIndicatorIOS,   // loading
 } from 'react-native';
@@ -14,6 +14,7 @@ import React,{
 // const FAKE_BOOK_DATA = [
 //     {volumeInfo: {title: 'The Catcher in the Rye', authors: "J. D. Salinger", imageLinks: {thumbnail: 'http://books.google.com/books/content?id=PCDengEACAAJ&printsec=frontcover&img=1&zoom=1&source=gbs_api'}}}
 // ];
+import RefreshableListView from 'react-native-refreshable-listview';
 import BookDetail from './BookDetail';
 
 // 导入数据的 url
@@ -23,6 +24,7 @@ class BookList extends Component{
   constructor(props){
     super(props);
     this.state={
+      isLoadingTail: false,
       isLoading: true,
       // listView 的 dataSource 是一个状态
       // 初始化 listView 的 dataSource 检查行是否变化，判断是否要更新 listView
@@ -30,14 +32,23 @@ class BookList extends Component{
         rowHasChanged: (row1, row2) => row1 !== row2
       })
     }
+    // let PropTypes ={
+    //   detail: React.PropTypes.object,
+    // }
   }
+
+  // componentWillMount(){
+  //   this.props.route.gotoBookDetail = this.gotoBookDetail;
+  // }
 
   componentDidMount(){
     // 当 DOM 结构加载完时获取数据
+    this._data = [];
     this.fetchData();
   }
 
   fetchData = ()=>{
+    console.log('enter fetchData');
     // 用 fetch 来获取数据
     // 参数为指定的 url
     fetch(REQUEST_URL)
@@ -45,9 +56,11 @@ class BookList extends Component{
     .then((respone) => respone.json())
     // 接着将转化为 json 格式的值中的每一行填充到数据源中
     .then((responeData) => {
+      this._data = this._data.concat(responeData.items);
+      console.log(this._data);
       this.setState({
         // 判断行是否改变，用来更新 listView
-        dataSource: this.state.dataSource.cloneWithRows(responeData.items),
+        dataSource: this.state.dataSource.cloneWithRows(this._data),
         isLoading: false,
       })
       // console.log('loading' + this.state.isLoading);
@@ -92,15 +105,31 @@ class BookList extends Component{
     //   // 传递一个属性对象 键：值
     //   passProps: {book},       // 传递的属性 ES6 写法，相当于 book: book
     // });
+    // console.log('enter _showBookDetail');
     const {navigator} = this.props;
     if(navigator){
-      console.log('enter navigator');
       navigator.push({
-        name: 'Book Detail',
-        component: BookDetail,
-        params: {book},
+        id: 'bookDetail',
+        obj: book,
       })
     }
+  };
+
+  onEndReached = () => {
+    console.log('enter onEndReached');
+    console.log(this.state.isLoadingTail);
+    if (this.state.isLoadingTail) {
+      // We're already fetching
+      return;
+    }
+    this.setState({
+      isLoadingTail: true,
+    });
+    // console.log(this.state.isLoadingTail);
+    this.fetchData();
+    this.setState({
+      isLoadingTail: false,
+    });
   };
 
   render(){
@@ -110,13 +139,16 @@ class BookList extends Component{
     }
     return(
       // 数据传进来之后显示
-      <ScrollView style={styles.scene}>
-        <ListView
-          style={styles.listView}
-          dataSource={this.state.dataSource}
-          // 定义 listView 每一行的样式
-          renderRow={this.renderBook} />
-      </ScrollView>
+      <RefreshableListView
+        style={styles.listView}
+        initialListSize={6}
+        dataSource={this.state.dataSource}
+        renderRow={this.renderBook}
+        loadData={this.fetchData} // 当返回一个对象或者调用 callback 函数后圆圈消失
+        refreshDescription="Refreshing books"  // 在圆圈上面显示的文字
+        onEndReached={this.onEndReached}
+        onEndReachedThreshold={10}
+      />
     );
   }
 
@@ -163,7 +195,8 @@ const styles = StyleSheet.create({
     backgroundColor: '#ddd',
   },
   listView: {
-    // marginTop: 65,   // 自己加的防止 ListView 被上面的导航条挡住
+    marginTop: 55,   // 自己加的防止 ListView 被上面的导航条挡住
+    marginBottom: 40,
     backgroundColor:'#F5FCFF',
   },
   loading: {

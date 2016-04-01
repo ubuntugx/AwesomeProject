@@ -7,21 +7,23 @@ import React,{
   Image,
 } from 'react-native';
 
-import NavButton from './NavButton';
-
 class BookDetail extends Component{
-  // constructor(props){
-  //   super(props);
-  //   this.state={
-  //   }
-  // }
-
+  constructor(props){
+    super(props);
+    let PropTypes ={
+      detail: React.PropTypes.object,
+    }
+  }
   render(){
-    console.log('props'+this.props.book)
-    const book = this.props.book;   // 由前面传递的属性
+    // console.log('enter BookDetail');
+    const book = this.props.detail;   // 由前面传递的属性
+    // console.log(book);
+    // console.log(book.volumeInfo);
     // 判断 ImageURI 是否存在
     const imageURI = (typeof book.volumeInfo.imageLinks !== 'undefined') ? book.volumeInfo.imageLinks.thumbnail : '';
+    // const imageURI = book.volumeInfo.imageLinks.thumbnail;
     const description = (typeof book.volumeInfo.description !== 'undefined') ? book.volumeInfo.description : '';
+    // console.log('!!!'+imageURI+" "+description);
     return(
       <View style={styles.mainContainer}>
         <View style={styles.container}>

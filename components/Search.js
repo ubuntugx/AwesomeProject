@@ -1,39 +1,20 @@
 import React,{
-  AppRegistry,
   Component,
-  StyleSheet,
-  Text,
-  View,
-  NavigatorIOS,
 } from 'react-native';
 
-import SearchBooks from './SearchBooks';
+import Routes from './Routes';
 
 class Search extends Component{
-  constructor(props){
-    super(props);
-    this.state={
-
-    }
-  }
+  // constructor(props){
+  //   super(props);
+  //   this.state={
+  //   }
+  // }
   render(){
-    return (
-      // 改为 Navigator
-      <NavigatorIOS
-        style={styles.container}
-        initialRoute={{
-          title: 'Search Books',
-          component: SearchBooks,
-        }} />
-      
+    return(
+      Routes.navigator('search')
     )
   }
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-  }
-})
 
 module.exports = Search;

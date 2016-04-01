@@ -17,7 +17,10 @@ class SearchResults extends Component{
     var dataSource = new ListView.DataSource({
       rowHasChanged: (row1, row2) => row1 !== row2})
     this.state = {
-      dataSource: dataSource.cloneWithRows(this.props.book),
+      dataSource: dataSource.cloneWithRows(this.props.result.book),
+    }
+    let PropTypes ={
+      result: React.PropTypes.object,
     }
   }
   render(){
@@ -52,11 +55,16 @@ class SearchResults extends Component{
   };
 
   _showBookDetail=(book)=>{
-    this.props.navigator.push({
-      title: book.volumeInfo.title,
-      component: BookDetail,
-      passProps: {book},
-    });
+    console.log(this.props.result);
+    const {navigator} = this.props;
+    if(navigator){
+      navigator.push({
+        id: 'bookDetail',
+        // title: book.volumeInfo.title,
+        // component: BookDetail,
+        obj: book,
+      });
+    }
   };
 }
 
@@ -78,6 +86,8 @@ const styles = StyleSheet.create({
     backgroundColor: '#dddddd'
   },
   listView: {
+    marginTop: 45,
+    marginBottom: 45,
     backgroundColor: '#F5FCFF',
   },
   cellContainer: {

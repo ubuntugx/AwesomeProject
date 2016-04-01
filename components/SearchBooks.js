@@ -48,9 +48,8 @@ class SearchBooks extends Component{
         this.setState({ isLoading: false });
         if(responseData.items){
           this.props.navigator.push({
-            title: 'Search Results',
-            component: SearchResults,
-            passProps: {book: responseData.items}
+            id: 'searchResults',
+            obj: {book: responseData.items}
           });
         } else {
           this.setState({errorMessage: 'No Results Found'})
