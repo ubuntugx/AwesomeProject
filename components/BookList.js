@@ -15,6 +15,7 @@ import GiftedListView from 'react-native-gifted-listview';
 
 import Spinner from 'react-native-spinkit';
 import BookDetail from './BookDetail';
+import BookListRow from './BookListRow';
 
 var REQUEST_URL = 'https://www.googleapis.com/books/v1/volumes?q=subject:fiction';
 
@@ -32,32 +33,38 @@ class BookList extends Component{
 
   componentDidMount(){
     this._data = [];
-    this.fetchData();
+    // 作用不是获得初始数据，只是把 Loading 弄掉了
+    // this.fetchData();
   }
 
-  fetchData = ()=>{
-    fetch(REQUEST_URL)
-    .then((respone) => respone.json())
-    .then((responeData) => {
-      // this._data = this._data.concat(responeData.items);
-      // console.log(this._data);
-      this.setState({
-        dataSource: this.state.dataSource.cloneWithRows(responeData.items),
-        isLoading: false,
-      })
-    })
-    .catch(err => console.error(err))
-    .done();
-  };
+  // fetchData = ()=>{
+  //   console.log('enter fetchData')
+  //   fetch(REQUEST_URL)
+  //   .then((respone) => respone.json())
+  //   .then((responeData) => {
+  //     // this._data = this._data.concat(responeData.items);
+  //     // console.log(this._data);
+  //     this.setState({
+  //       dataSource: this.state.dataSource.cloneWithRows(responeData.items),
+  //       isLoading: false,
+  //     })
+  //   })
+  //   .catch(err => console.error(err))
+  //   .done();
+  // };
 
+  // 刷新时调用的函数
   onFetch = (page = 1, callback, options)=>{
+    console.log('enter onFetch');
     fetch(REQUEST_URL)
     .then((respone) => respone.json())
     .then((responeData) => {
       // this._data = this._data.concat(responeData.items);
       // console.log(this._data);
+      console.log(responeData.items);
       callback(responeData.items);
       this.setState({
+        // dataSource: this.state.dataSource.cloneWithRows(responeData.items),
         // dataSource: this.state.dataSource.cloneWithRows(this._data),
         isLoading: false,
       })
@@ -167,9 +174,9 @@ class BookList extends Component{
 
 
   render(){
-    if(this.state.isLoading){
-      return this.renderLoadingView()
-    }
+    // if(this.state.isLoading){
+    //   return this.renderLoadingView()
+    // }
     return(
       <GiftedListView
         style={styles.listView}
