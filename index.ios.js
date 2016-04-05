@@ -9,7 +9,7 @@ import React,{
 import Featured from './components/Featured';   // 精选模块
 import Search from './components/Search';       // 搜索模块
 
-class demoUbuntugx extends Component{
+class IDBTest extends Component{
   constructor(props){
     super(props);
     this.state={
@@ -45,4 +45,4 @@ const styles = StyleSheet.create({
 
 })
 
-AppRegistry.registerComponent('demoUbuntugx', () => demoUbuntugx);
+AppRegistry.registerComponent('IDBTest', () => IDBTest);

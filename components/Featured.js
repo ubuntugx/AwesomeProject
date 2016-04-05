@@ -1,22 +1,13 @@
 import React,{
-  AppRegistry,
   Component,
-  StyleSheet,
-  Text,
-  View,
-  Navigator,
 } from 'react-native';
 
-// import BookList from './BookList';
-import NavButton from './NavButton';
 import Routes from './Routes';
 
 class Featured extends Component{
   render(){
     return (
-      <View style={styles.container}>
-        {Routes.navigator('feature')}
-      </View>
+        Routes.navigator('feature')
       //<Navigator
         // sceneStyle={styles.container}
         // // 指定初始路由
@@ -47,14 +38,5 @@ class Featured extends Component{
     )
   }
 }
-
-const styles = StyleSheet.create({
-  container:{
-    flex: 1,
-  },
-  navBar: {
-    backgroundColor: '#FFF',
-  },
-})
 
 module.exports = Featured;   // 将模块导出

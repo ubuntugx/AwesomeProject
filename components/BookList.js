@@ -6,26 +6,24 @@ import React,{
   View,
   Image,
   ListView,
-  ScrollView,
   TouchableHighlight,
-  ActivityIndicatorIOS,   // loading
+  TouchableOpacity,
+  ActivityIndicatorIOS,   
 } from 'react-native';
 
-// const FAKE_BOOK_DATA = [
-//     {volumeInfo: {title: 'The Catcher in the Rye', authors: "J. D. Salinger", imageLinks: {thumbnail: 'http://books.google.com/books/content?id=PCDengEACAAJ&printsec=frontcover&img=1&zoom=1&source=gbs_api'}}}
-// ];
+import GiftedListView from 'react-native-gifted-listview';
+
+import Spinner from 'react-native-spinkit';
 import BookDetail from './BookDetail';
 
-// 导入数据的 url
 var REQUEST_URL = 'https://www.googleapis.com/books/v1/volumes?q=subject:fiction';
 
 class BookList extends Component{
   constructor(props){
     super(props);
     this.state={
+      isLoadingTail: false,
       isLoading: true,
-      // listView 的 dataSource 是一个状态
-      // 初始化 listView 的 dataSource 检查行是否变化，判断是否要更新 listView
       dataSource: new ListView.DataSource({
         rowHasChanged: (row1, row2) => row1 !== row2
       })
@@ -33,33 +31,43 @@ class BookList extends Component{
   }
 
   componentDidMount(){
-    // 当 DOM 结构加载完时获取数据
+    this._data = [];
     this.fetchData();
   }
 
   fetchData = ()=>{
-    // 用 fetch 来获取数据
-    // 参数为指定的 url
     fetch(REQUEST_URL)
-    // 接着将获取到的值转化为 json 格式
     .then((respone) => respone.json())
-    // 接着将转化为 json 格式的值中的每一行填充到数据源中
     .then((responeData) => {
+      // this._data = this._data.concat(responeData.items);
+      // console.log(this._data);
       this.setState({
-        // 判断行是否改变，用来更新 listView
         dataSource: this.state.dataSource.cloneWithRows(responeData.items),
         isLoading: false,
       })
-      // console.log('loading' + this.state.isLoading);
     })
-    // 最后要调用 done
+    .catch(err => console.error(err))
     .done();
   };
-  // 定义 listView 每一行的样式，renderRow 默认传的参数是每一行的数据源
-  // 定义里面的信息为每一行数据源的信息
+
+  onFetch = (page = 1, callback, options)=>{
+    fetch(REQUEST_URL)
+    .then((respone) => respone.json())
+    .then((responeData) => {
+      // this._data = this._data.concat(responeData.items);
+      // console.log(this._data);
+      callback(responeData.items);
+      this.setState({
+        // dataSource: this.state.dataSource.cloneWithRows(this._data),
+        isLoading: false,
+      })
+    })
+    .catch(err => console.error(err))
+    .done();
+  };
+
   renderBook = (book)=>{
     return (
-      // 点击列表的每一项时，跳到 Detail 页面
       <TouchableHighlight onPress={() => this._showBookDetail(book)}>
         <View>
           <View style={styles.container}>
@@ -77,52 +85,125 @@ class BookList extends Component{
     );
   };
 
-  // listView 的每一列是一个普通按钮
-  // 点击按钮进入详情
-  // 因为是点击当前行的内容，所以传进去的是当前行的所有信息
-  _showBookDetail=(book) => {
-    // 导航器 NavigatorIOS 由路由组成
-    // push(route) 给导航器添加一个新路由
-    // 这个 navigator 的属性是由前面一页传过来的
-    // 调用 push 方法加入新的路由
-    // this.props.navigator.push({
-    //   // 还包括这几项，其中 passProps 用于传递属性
-    //   title: book.volumeInfo.title,
-    //   component: BookDetail,   // 组件内容
-    //   // 传递一个属性对象 键：值
-    //   passProps: {book},       // 传递的属性 ES6 写法，相当于 book: book
-    // });
+  _showBookDetail = (book) => {
     const {navigator} = this.props;
     if(navigator){
-      console.log('enter navigator');
       navigator.push({
-        name: 'Book Detail',
-        component: BookDetail,
-        params: {book},
+        id: 'bookDetail',
+        obj: book,
       })
     }
   };
 
+  onEndReached = () => {
+    if (this.state.isLoadingTail) {
+      return;
+    }
+    this.setState({
+      isLoadingTail: true,
+    });
+    this.fetchData();
+    this.setState({
+      isLoadingTail: false,
+    });
+  };
+
+  renderFetchingView = ()=>{
+    return (
+      <View style={styles.loadingView}>
+        <Spinner size={36} type="Bounce" color="#5ac8fb" />
+      </View>
+    );
+  };
+
+  renderAllLoadedView = ()=>{
+    return (
+      <View style={styles.loadingView}>
+        <Text>加载完成</Text>
+      </View>
+    );
+  };
+
+  renderWaitingView = (paginateCallback)=>{
+    return (
+      <View style={styles.loadingView}>
+        <TouchableOpacity onPress={paginateCallback}>
+          <Text style={{color:'#777',fontSize:14}}>点击加载更多</Text>
+        </TouchableOpacity>
+      </View>
+    );
+  };
+
+  renderRefreshableFetchingView = ()=>{
+    return (
+      <View style={styles.loadingView}>
+        <Spinner size={36} type="Wave" color="#5ac8fb" />
+      </View>
+    );
+  };
+
+  renderRefreshableWillRefreshView = ()=>{
+    console.log('enter renderRefreshableWaitingView')
+    return (
+      <View style={styles.loadingView}>
+        <Text style={styles.pullText}>⇡ 释放更新</Text>
+      </View>
+    );
+  };
+
+  renderRefreshableWaitingView = ()=>{
+    return (
+      <View style={styles.loadingView}>
+        <Text style={styles.pullText}>⇣ 下拉刷新</Text>
+      </View>
+    );
+  };
+
+  renderEmptyView = ()=>{
+    return (
+      <Text>No data yet.</Text>
+    );
+  };
+
+
   render(){
-    // 加一个 loading，在数据没有获取之前显示 loading 页面
     if(this.state.isLoading){
       return this.renderLoadingView()
     }
     return(
-      // 数据传进来之后显示
-      <ScrollView style={styles.scene}>
-        <ListView
-          style={styles.listView}
-          dataSource={this.state.dataSource}
-          // 定义 listView 每一行的样式
-          renderRow={this.renderBook} />
-      </ScrollView>
+      <GiftedListView
+        style={styles.listView}
+        rowView={this.renderBook}
+        onFetch={this.onFetch}
+        // dataSource={this.state.dataSource}
+
+        firstLoader={true}
+
+        pagination={true}
+        paginationFetchigView={this.renderFetchingView}
+        paginationAllLoadedView={this.renderAllLoadedView}
+        paginationWaitingView={this.renderWaitingView}
+
+        refreshable={true} 
+        refreshableFetchingView={this.renderRefreshableFetchingView}
+        refreshableWillRefreshView={this.renderRefreshableWillRefreshView}
+        refreshableWaitingView={this.renderRefreshableWaitingView}
+
+        emptyView={this.renderEmptyView}
+
+        // withSections={false}
+        customStyles={{
+          paginationView: {
+            backgroundColor: '#F5FCFF',
+          },
+        }}
+        // refreshableTintColor="blue"
+      />
     );
   }
 
   renderLoadingView(){
     return(
-      // ActivityIndicatorIOS 是 loading 的页面
       <View style={styles.loading}>
         <ActivityIndicatorIOS
           size='large' />
@@ -163,7 +244,8 @@ const styles = StyleSheet.create({
     backgroundColor: '#ddd',
   },
   listView: {
-    // marginTop: 65,   // 自己加的防止 ListView 被上面的导航条挡住
+    marginTop: 55,
+    marginBottom: 40,
     backgroundColor:'#F5FCFF',
   },
   loading: {
@@ -176,7 +258,16 @@ const styles = StyleSheet.create({
     paddingTop: 20,
     backgroundColor: '#EAEAEA',
   },
-
+  loadingView: {
+    flex: 1,
+    height: 50,
+    alignItems: 'center',
+    justifyContent:'center'
+  },
+  pullText: {
+    fontSize: 14,
+    color: '#666',
+  },
 })
 
 module.exports = BookList;
