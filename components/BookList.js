@@ -16,53 +16,74 @@ import GiftedListView from 'react-native-gifted-listview';
 import Spinner from 'react-native-spinkit';
 import BookDetail from './BookDetail';
 import BookListRow from './BookListRow';
-import BuildService from './BuildService';
-import Realm from 'realm';
 
 var REQUEST_URL = 'https://www.googleapis.com/books/v1/volumes?q=subject:fiction';
-
-let realm = new Realm();
 
 class BookList extends Component{
   constructor(props){
     super(props);
-    // this.state={
-    //   isLoadingTail: false,
-    //   isLoading: true,
-    //   dataSource: new ListView.DataSource({
-    //     rowHasChanged: (row1, row2) => row1 !== row2
-    //   })
-    // }
+    this.state={
+      isLoadingTail: false,
+      isLoading: true,
+      dataSource: new ListView.DataSource({
+        rowHasChanged: (row1, row2) => row1 !== row2
+      })
+    }
   }
 
   componentDidMount(){
     this._data = [];
+    // 作用不是获得初始数据，只是把 Loading 弄掉了
+    // this.fetchData();
   }
+
+  // fetchData = ()=>{
+  //   console.log('enter fetchData')
+  //   fetch(REQUEST_URL)
+  //   .then((respone) => respone.json())
+  //   .then((responeData) => {
+  //     // this._data = this._data.concat(responeData.items);
+  //     // console.log(this._data);
+  //     this.setState({
+  //       dataSource: this.state.dataSource.cloneWithRows(responeData.items),
+  //       isLoading: false,
+  //     })
+  //   })
+  //   .catch(err => console.error(err))
+  //   .done();
+  // };
+
   // 刷新时调用的函数
   onFetch = (page = 1, callback, options)=>{
-     BuildService.loadBuildList('http://www.pgyer.com/apiv1/user/listMyPublished',1)
-      .then((value) => {
-        let builds = realm.objects("Build");
-        callback(builds);
-        this.setState({
-          isLoading: false,
-        })
+    console.log('enter onFetch');
+    fetch(REQUEST_URL)
+    .then((respone) => respone.json())
+    .then((responeData) => {
+      // this._data = this._data.concat(responeData.items);
+      // console.log(this._data);
+      console.log(responeData.items);
+      callback(responeData.items);
+      this.setState({
+        // dataSource: this.state.dataSource.cloneWithRows(responeData.items),
+        // dataSource: this.state.dataSource.cloneWithRows(this._data),
+        isLoading: false,
       })
-      .catch(err => console.error(err))
-      .done();
+    })
+    .catch(err => console.error(err))
+    .done();
   };
 
-  renderBook = (build)=>{
+  renderBook = (book)=>{
     return (
-      <TouchableHighlight onPress={() => this._showBookDetail(build)}>
+      <TouchableHighlight onPress={() => this._showBookDetail(book)}>
         <View>
           <View style={styles.container}>
-            <Image source={{uri: 'http://o1wh05aeh.qnssl.com/image/view/app_icons/'+build.appIcon}}
+            <Image source={{uri: book.volumeInfo.imageLinks.thumbnail}}
                    style={styles.thumbnail}
             />
             <View style={styles.rightContainer}>
-              <Text style={styles.title}>{build.appName}</Text>
-              <Text style={styles.author}>{build.appVersion}</Text>
+              <Text style={styles.title}>{book.volumeInfo.title}</Text>
+              <Text style={styles.author}>{book.volumeInfo.authors}</Text>
             </View>
           </View>
           <View style={styles.separator}></View>
@@ -81,18 +102,18 @@ class BookList extends Component{
     }
   };
 
-  // onEndReached = () => {
-  //   if (this.state.isLoadingTail) {
-  //     return;
-  //   }
-  //   this.setState({
-  //     isLoadingTail: true,
-  //   });
-  //   this.fetchData();
-  //   this.setState({
-  //     isLoadingTail: false,
-  //   });
-  // };
+  onEndReached = () => {
+    if (this.state.isLoadingTail) {
+      return;
+    }
+    this.setState({
+      isLoadingTail: true,
+    });
+    this.fetchData();
+    this.setState({
+      isLoadingTail: false,
+    });
+  };
 
   renderFetchingView = ()=>{
     return (
@@ -159,10 +180,8 @@ class BookList extends Component{
     return(
       <GiftedListView
         style={styles.listView}
-        initialListSize= {6}
         rowView={this.renderBook}
         onFetch={this.onFetch}
-        autoPaginate= {true}  // 控制到最后上拉刷新，不是点击按钮
         // dataSource={this.state.dataSource}
 
         firstLoader={true}
